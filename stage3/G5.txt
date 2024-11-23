@@ -1,0 +1,9 @@
+Krishna Ramesh - kramesh5@wisc.edu
+Manoj Arulmurugan - arulmurugan@wisc.edu
+Scott Huddleston - schuddleston@wisc.edu
+
+All three of us worked together to plan and draw out implementation. We also all constructed the allocBuf() method, discussing and analyzing the code as we worked.
+Krishna wrote up the allocPage() method, and added comments.
+Manoj wrote up the unpinPage() method, and added comments.
+Scott wrote up the readPage() method, and added comments.
+All three us then debugged together at the end.
