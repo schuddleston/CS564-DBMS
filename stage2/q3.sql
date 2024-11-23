@@ -1,0 +1,1 @@
+SELECT d.department_name, AVG(j.max_salary) AS max_salaries FROM departments d JOIN employees e ON d.department_id=e.department_id JOIN jobs j ON j.job_id=e.job_id GROUP BY d.department_name HAVING max_salaries > 8000;

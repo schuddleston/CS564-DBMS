@@ -1,0 +1,5 @@
+Krishna Ramesh - kramesh5@wisc.edu
+Manoj Arulmurugan - arulmurugan@wisc.edu
+Scott Huddleston - schuddleston@wisc.edu
+
+We worked on all 10 sql queries together. We brainstormed how to approach each query and then tested our solution using SQLite3 on the CS Lab Machine that Scott had set up.
