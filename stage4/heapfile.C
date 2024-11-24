@@ -1,7 +1,19 @@
+/**
+ * Krishna Ramesh - 908 469 4752 - kramesh5@wisc.edu
+ * Scott Huddleston - 908 229 1163 - schuddleston@wisc.edu
+ * Manoj Arulmurugan - <student ID here> - arulmurugan@wisc.edu
+ * 
+ * *** TO DO ***
+ */
+
 #include "heapfile.h"
 #include "error.h"
 
-// routine to create a heapfile
+/**
+ * Creates an (almost) empty heap file, with a header page and first page.
+ * @param fileName the name of the file being created
+ * @return Status OK if creation successful, else other statuses if failed in a specific step.
+ */
 const Status createHeapFile(const string fileName)
 {
     File* 		file;
@@ -11,25 +23,50 @@ const Status createHeapFile(const string fileName)
     int			newPageNo;
     Page*		newPage;
 
-    // try to open the file. This should return an error
+    // Tries to open the file. This should return an error...
     status = db.openFile(fileName, file);
     if (status != OK)
     {
-		// file doesn't exist. First create it and allocate
-		// an empty header page and data page.
+        // Creates this new file, opens it, and allocates 
+        // an empty header page in the buffer pool for it.
+		status = db.createFile(fileName); 
+        if (status != OK) {return status;} // Returns error msg if failed
+        status = db.openFile(fileName, file);
+        if (status != OK) {return status;} // Returns error msg if failed
+        status = bufMgr->allocPage(file, hdrPageNo, newPage); 
+        if (status != OK) {db.closeFile(file); return status;} // Returns error msg & closes file if failed
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
+        // Cast new page pointer to FileHdrPage.
+		hdrPage = (FileHdrPage*)newPage;
+
+        // Converts 'fileName' string parameter into a char
+        // pointer array, then initializes the header page's
+        // 'fileName' variable as such.        
+        char newFileName[MAXNAMESIZE];
+        fileName.copy(newFileName, strlen(newFileName));
+        strcpy(hdrPage->fileName, newFileName);
+
+        // Retrieves pointer to the first page of the file,
+        // and initializes this new page's contents.
+        status = bufMgr->allocPage(file, newPageNo, newPage);
+        if (status != OK) {db.closeFile(file); return status;} // Returns error msg & closes file if failed
+        newPage->init(newPageNo);
+
+        // Assign the header page's values accordingly.
+        hdrPage->pageCnt = 1;
+        hdrPage->firstPage = newPageNo;
+        hdrPage->lastPage = newPageNo;
+        
+        // Unpins and marks dirty both the header page & its first page.
+        status = bufMgr->unPinPage(file, hdrPageNo, true);
+        if (status != OK) {db.closeFile(file); return status;} // Returns error msg & closes file if failed
+        status = bufMgr->unPinPage(file, newPageNo, true);
+        if (status != OK) {db.closeFile(file); return status;} // Returns error msg & closes file if failed
+
+        // Closes the file (ensures destroyHeapFile() can be called later).
+        status = db.closeFile(file);
+        
+        return status;
     }
     return (FILEEXISTS);
 }
