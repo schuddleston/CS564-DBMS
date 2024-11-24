@@ -29,7 +29,7 @@ const Status createHeapFile(const string fileName)
     {
         // Creates this new file, opens it, and allocates 
         // an empty header page in the buffer pool for it.
-	status = db.createFile(fileName); 
+	    status = db.createFile(fileName); 
         if (status != OK) {return status;} // Returns error msg if failed
         status = db.openFile(fileName, file);
         if (status != OK) {return status;} // Returns error msg if failed
@@ -37,7 +37,7 @@ const Status createHeapFile(const string fileName)
         if (status != OK) {db.closeFile(file); return status;} // Returns error msg & closes file if failed
 		
         // Cast new page pointer to FileHdrPage.
-	hdrPage = (FileHdrPage*)newPage;
+	    hdrPage = (FileHdrPage*)newPage;
 
         // Converts 'fileName' string parameter into a char
         // pointer array, then initializes the header page's
