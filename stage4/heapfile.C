@@ -78,6 +78,9 @@ const Status destroyHeapFile(const string fileName)
 }
 
 // constructor opens the underlying file
+/**
+ * TO DO
+ */
 HeapFile::HeapFile(const string & fileName, Status& returnStatus)
 {
     Status 	status;
@@ -88,17 +91,35 @@ HeapFile::HeapFile(const string & fileName, Status& returnStatus)
     // open the file and read in the header page and the first data page
     if ((status = db.openFile(fileName, filePtr)) == OK)
     {
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
+        // Gets the page number of the header page of the file
+        status = filePtr->getFirstPage(curPageNo);
+        if (status != OK) {returnStatus = status; return;} // Returns error msg if failed.
+
+        // Reads & pins the header page of the file in the buffer pool
+        status = bufMgr->readPage(filePtr, curPageNo, pagePtr);
+        if (status != OK) {returnStatus = status; return;} // Returns error msg if failed
+
+        // Initializes data members associated with header page
+        FileHdrPage* hdrPage;
+        hdrPage = (FileHdrPage*)pagePtr;
+        headerPageNo = curPageNo;
+        hdrDirtyFlag = false;
+
+        // Reads & pins the first data page of the file in the buffer pool
+        status = bufMgr->readPage(filePtr, hdrPage->firstPage, pagePtr);
+        if (status != OK) {returnStatus = status; return;} // Returns error msg if failed
+
+        // Initializes data members associated with the first data page
+        curPage = pagePtr;
+        curPageNo = hdrPage->firstPage;
+        curDirtyFlag = false;
+        curRec = NULLRID;
+
+        // Closes the file (ensures destroyHeapFile() can be called later)
+        status = db.closeFile(filePtr);
+        returnStatus = status;
+    
+        return;
     }
     else
     {
