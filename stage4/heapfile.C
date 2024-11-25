@@ -131,7 +131,7 @@ HeapFile::HeapFile(const string & fileName, Status& returnStatus)
         curRec = NULLRID;
 
         // Closes the file (ensures destroyHeapFile() can be called later)
-        status = db.closeFile(filePtr);
+        // status = db.closeFile(filePtr);
         returnStatus = status;
     
         return;
