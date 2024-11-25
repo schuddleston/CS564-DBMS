@@ -74,7 +74,7 @@ const Status createHeapFile(const string fileName)
 
         // Closes the file (ensures destroyHeapFile() can be called later).
         // status = bufMgr->flushFile(file);
-        status = db.closeFile(file);
+        // status = db.closeFile(file);
         
         return status;
     }
@@ -193,13 +193,43 @@ const Status HeapFile::getRecord(const RID & rid, Record & rec)
     Status status;
 
     // cout<< "getRecord. record (" << rid.pageNo << "." << rid.slotNo << ")" << endl;
-   
-   
-   
-   
-   
-   
-   
+    if (curPage == NULL)
+    {
+        status = bufMgr->readPage(filePtr, rid.pageNo, curPage);
+        if (status != OK){return status;}
+
+        //"Book-keeping: Set the fields curPage, curPageNo, curDirtyFlag, and curRec of the HeapFile object appropriately:"
+        status = curPage->getRecord(rid, rec);
+        if (status != OK){return status;}
+        curPageNo = rid.pageNo;
+        curDirtyFlag = false;
+        curRec = rid;
+
+        return status;
+    }
+    else
+    {
+        if (rid.pageNo != curPageNo)
+        {
+            status = bufMgr->unPinPage(filePtr, curPageNo, curDirtyFlag);
+            if (status != OK){return status;}
+
+            status = bufMgr->readPage(filePtr, rid.pageNo, curPage);
+            if (status != OK){return status;}
+
+            curPageNo = rid.pageNo;
+            curRec = rid;
+            curDirtyFlag = false;
+            status = curPage->getRecord(rid, rec);
+            if (status != OK){return status;}
+            else{ return OK;}
+        }
+        
+            status = curPage->getRecord(rid, rec);
+            if (status != OK){ return status; }
+            curRec = rid;
+            return OK;
+    }
 }
 
 HeapFileScan::HeapFileScan(const string & name,
@@ -517,6 +547,8 @@ const Status InsertFileScan::insertRecord(const Record & rec, RID& outRid)
         curPage = newPage;
         curPageNo = newPageNo;
         curDirtyFlag = true;
+
+        bufMgr->unPinPage(filePtr, curPageNo, curDirtyFlag); // unpin curPage
 
         // try to insert record into curPage
         status = curPage->insertRecord(rec, outRid);
