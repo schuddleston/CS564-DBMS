@@ -46,6 +46,14 @@ const Status createHeapFile(const string fileName)
         fileName.copy(newFileName, strlen(newFileName));
         strcpy(hdrPage->fileName, newFileName);
 
+        /* Manoj:
+
+        // Copy the file name into the header page.
+        strncpy(hdrPage->fileName, fileName.c_str(), MAXNAMESIZE - 1);
+        hdrPage->fileName[MAXNAMESIZE - 1] = '\0'; // Ensure null termination.
+        
+        */
+
         // Retrieves pointer to the first page of the file,
         // and initializes this new page's contents.
         status = bufMgr->allocPage(file, newPageNo, newPage);
@@ -56,6 +64,7 @@ const Status createHeapFile(const string fileName)
         hdrPage->pageCnt = 1;
         hdrPage->firstPage = newPageNo;
         hdrPage->lastPage = newPageNo;
+        hdrPage->recCnt = 0;
         
         // Unpins and marks dirty both the header page & its first page.
         status = bufMgr->unPinPage(file, hdrPageNo, true);
@@ -64,6 +73,7 @@ const Status createHeapFile(const string fileName)
         if (status != OK) {db.closeFile(file); return status;} // Returns error msg & closes file if failed
 
         // Closes the file (ensures destroyHeapFile() can be called later).
+        status = bufMgr->flushFile(file);
         status = db.closeFile(file);
         
         return status;
@@ -92,26 +102,31 @@ HeapFile::HeapFile(const string & fileName, Status& returnStatus)
     if ((status = db.openFile(fileName, filePtr)) == OK)
     {
         // Gets the page number of the header page of the file
-        status = filePtr->getFirstPage(curPageNo);
+        //status = filePtr->getFirstPage(curPageNo);
+        status = filePtr->getFirstPage(headerPageNo); //"Next, it reads and pins the header page for the file in the buffer pool"
         if (status != OK) {returnStatus = status; return;} // Returns error msg if failed.
 
         // Reads & pins the header page of the file in the buffer pool
-        status = bufMgr->readPage(filePtr, curPageNo, pagePtr);
+        //status = bufMgr->readPage(filePtr, curPageNo, pagePtr);
+        status = bufMgr->readPage(filePtr, headerPageNo, pagePtr);
         if (status != OK) {returnStatus = status; return;} // Returns error msg if failed
 
         // Initializes data members associated with header page
-        FileHdrPage* hdrPage;
-        hdrPage = (FileHdrPage*)pagePtr;
-        headerPageNo = curPageNo;
+        //FileHdrPage* hdrPage;
+        //hdrPage = (FileHdrPage*)pagePtr;
+        //headerPageNo = curPageNo;
+        headerPage = (FileHdrPage *)pagePtr;
         hdrDirtyFlag = false;
 
         // Reads & pins the first data page of the file in the buffer pool
-        status = bufMgr->readPage(filePtr, hdrPage->firstPage, pagePtr);
+        //status = bufMgr->readPage(filePtr, hdrPage->firstPage, pagePtr);
+        curPageNo = headerPage->firstPage; // current page is by default first page
+        status = bufMgr->readPage(filePtr, curPageNo, curPage);
         if (status != OK) {returnStatus = status; return;} // Returns error msg if failed
 
         // Initializes data members associated with the first data page
-        curPage = pagePtr;
-        curPageNo = hdrPage->firstPage;
+        //curPage = pagePtr;
+        //curPageNo = hdrPage->firstPage;
         curDirtyFlag = false;
         curRec = NULLRID;
 
@@ -283,14 +298,73 @@ const Status HeapFileScan::scanNext(RID& outRid)
     Record      rec;
 
     
-	
-	
-	
-	
-	
-	
-	
-	
+    nextPageNo = curPageNo; //Getting the firstPage
+    
+    while(true){
+        //Get the next page
+        if (nextPageNo == -1) {return FILEEOF;}
+
+        status = bufMgr->unPinPage(filePtr, curPageNo, curDirtyFlag); // if there is a nextPage, unpin the current page
+        if (status != OK){ return status; }
+
+        //Read in the new page and reset variables associated with it
+        status = bufMgr->readPage(filePtr, nextPageNo, curPage); 
+        if (status != OK) return status;
+        
+        curPageNo = nextPageNo;
+        curDirtyFlag = false;
+
+        //Iterate over all records
+        if (curRec.pageNo == NULLRID.pageNo && curRec.slotNo == NULLRID.slotNo) {
+            //Getting the first record
+            status = curPage->firstRecord(nextRid);
+        } 
+        else {status = OK;}
+
+        if (status != OK && status != NORECORDS) {
+            //Records don't exist
+            return status;
+        } 
+        else if(status == OK){ 
+            //Records do exist
+            if (curRec.pageNo != NULLRID.pageNo && curRec.slotNo != NULLRID.slotNo) {
+                status = curPage->nextRecord(curRec, nextRid);
+                tmpRid = nextRid;
+            }
+
+            if (status != OK && status != ENDOFPAGE) {
+                return status;
+            } 
+
+            else if (status == OK) { 
+                //If it is the final record, skip it
+                while (true) {
+                    //Try to match record
+                    status = curPage->getRecord(nextRid, rec);
+                    if (status != OK){ return status; }
+                    curRec = nextRid;
+                    if (matchRec(rec)){
+                        outRid = nextRid;
+                        return OK;
+                    }
+                    tmpRid = nextRid;
+
+                    //Continue getting next record (No match)
+                    status = curPage->nextRecord(tmpRid, nextRid);
+                    if (status == ENDOFPAGE) {
+                        curRec = NULLRID;
+                        break; //Finished scanning, but no records
+                    }
+                }
+            } 
+            else {
+                curRec = NULLRID;
+            }
+        }
+        status = curPage->getNextPage(nextPageNo);
+        if (status != OK){ return status; }
+    }
+    return OK;
 	
 }
 
