@@ -477,10 +477,10 @@ InsertFileScan::~InsertFileScan()
 // Insert a record into the file
 const Status InsertFileScan::insertRecord(const Record & rec, RID& outRid)
 {
-    Page*	newPage;
-    int		newPageNo;
-    Status	status, unpinstatus;
-    RID		rid;
+    Page*    newPage;
+    int        newPageNo;
+    Status    status, unpinstatus;
+    RID        rid;
 
     // check for very large records
     if ((unsigned int) rec.length > PAGESIZE-DPFIXED)
@@ -489,18 +489,45 @@ const Status InsertFileScan::insertRecord(const Record & rec, RID& outRid)
         return INVALIDRECLEN;
     }
 
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+    if(curPage == NULL) {
+        bufMgr->readPage(filePtr, headerPage->lastPage, curPage);
+        curPageNo = headerPage->lastPage;
+    }
+
+    // try to insert record into curPage
+    status = curPage->insertRecord(rec, outRid);
+    if(status == OK) { // inserting into curPage was successful
+        // bookkeeping
+        headerPage->recCnt++;
+        hdrDirtyFlag = true;
+        curDirtyFlag = true;
+    }
+    else { // could not insert into curPage
+        status = bufMgr->allocPage(filePtr, newPageNo, newPage); // create a new page
+        if(status != OK) return status;
+        newPage->init(newPageNo); // initialize the new page
+
+        // modify header page contents
+        headerPage->lastPage = newPageNo;
+        headerPage->pageCnt++;
+        hdrDirtyFlag = true;
+
+        // link the new page
+        curPage->setNextPage(newPageNo);
+        curPage = newPage;
+        curPageNo = newPageNo;
+        curDirtyFlag = true;
+
+        // try to insert record into curPage
+        status = curPage->insertRecord(rec, outRid);
+        if(status == OK) {
+            // bookkeeping
+            headerPage->recCnt++;
+            hdrDirtyFlag = true;
+            curDirtyFlag = true;
+        }
+    }
+    return status;
 }
 
 
