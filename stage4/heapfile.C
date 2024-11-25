@@ -73,7 +73,7 @@ const Status createHeapFile(const string fileName)
         if (status != OK) {db.closeFile(file); return status;} // Returns error msg & closes file if failed
 
         // Closes the file (ensures destroyHeapFile() can be called later).
-        status = bufMgr->flushFile(file);
+        // status = bufMgr->flushFile(file);
         status = db.closeFile(file);
         
         return status;
@@ -115,7 +115,7 @@ HeapFile::HeapFile(const string & fileName, Status& returnStatus)
         //FileHdrPage* hdrPage;
         //hdrPage = (FileHdrPage*)pagePtr;
         //headerPageNo = curPageNo;
-        headerPage = (FileHdrPage *)pagePtr;
+        headerPage = (FileHdrPage*)pagePtr;
         hdrDirtyFlag = false;
 
         // Reads & pins the first data page of the file in the buffer pool
