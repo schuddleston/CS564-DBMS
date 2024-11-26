@@ -2,4 +2,6 @@ Krishna Ramesh - kramesh5@wisc.edu
 Manoj Arulmurugan - arulmurugan@wisc.edu
 Scott Huddleston - schuddleston@wisc.edu
 
-/* TO DO */
+Scott worked on the createHeapFile method and the HeapFile constructor. 
+Manoj worked on scanNext and getRecord methods.
+Krishna worked on insertRecord method and debugging errors

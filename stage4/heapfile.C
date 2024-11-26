@@ -1,7 +1,7 @@
 /**
  * Krishna Ramesh - 908 469 4752 - kramesh5@wisc.edu
  * Scott Huddleston - 908 229 1163 - schuddleston@wisc.edu
- * Manoj Arulmurugan - <student ID here> - arulmurugan@wisc.edu
+ * Manoj Arulmurugan - 908 754 9409 - arulmurugan@wisc.edu
  * 
  * *** TO DO ***
  */
@@ -500,8 +500,8 @@ const Status InsertFileScan::insertRecord(const Record & rec, RID& outRid)
         return INVALIDRECLEN;
     }
 
-    if(curPage == NULL) {
-        bufMgr->readPage(filePtr, headerPage->lastPage, curPage);
+    if(curPage == NULL) { // check if curPage is null
+        bufMgr->readPage(filePtr, headerPage->lastPage, curPage); // read into buffer
         curPageNo = headerPage->lastPage;
     }
 
@@ -523,7 +523,8 @@ const Status InsertFileScan::insertRecord(const Record & rec, RID& outRid)
         headerPage->pageCnt++;
         hdrDirtyFlag = true;
 
-        bufMgr->unPinPage(filePtr, curPageNo, curDirtyFlag); // unpin curPage
+        status = bufMgr->unPinPage(filePtr, curPageNo, curDirtyFlag); // unpin curPage
+        if(status != OK) return status;
 
         // link the new page
         curPage->setNextPage(newPageNo);
