@@ -212,7 +212,12 @@ const Status HeapFile::getRecord(const RID & rid, Record & rec)
         if (rid.pageNo != curPageNo)
         {
             status = bufMgr->unPinPage(filePtr, curPageNo, curDirtyFlag);
-            if (status != OK){return status;}
+            if (status != OK){
+                curPage = NULL;
+                curPageNo = -1;
+                curDirtyFlag = false;
+                return status;
+            }
 
             status = bufMgr->readPage(filePtr, rid.pageNo, curPage);
             if (status != OK){return status;}
@@ -654,6 +659,7 @@ const Status InsertFileScan::insertRecord(const Record & rec, RID& outRid)
 
     if(curPage == NULL) {
         bufMgr->readPage(filePtr, headerPage->lastPage, curPage);
+        if (status != OK){return status;}
         curPageNo = headerPage->lastPage;
     }
 
@@ -664,12 +670,31 @@ const Status InsertFileScan::insertRecord(const Record & rec, RID& outRid)
         headerPage->recCnt++;
         hdrDirtyFlag = true;
         curDirtyFlag = true;
+        outRid = rid;
     }
     else { // could not insert into curPage
         status = bufMgr->allocPage(filePtr, newPageNo, newPage); // create a new page
         if(status != OK) return status;
         newPage->init(newPageNo); // initialize the new page
+        newPage->setNextPage(-1);
 
+        int tmpRid;
+        curPage->getNextPage(tmpRid);
+        curPage->setNextPage(newPageNo);
+        newPage->setNextPage(tmpRid);
+        // if curPage was the last page, make newPage the last page
+        if (tmpRid == -1){
+            headerPage->lastPage = newPageNo;
+        }
+        headerPage->pageCnt++;
+        unpinstatus = bufMgr->unPinPage(filePtr, curPageNo, curDirtyFlag);
+        if (unpinstatus != OK){return status;}
+        curPage = newPage;
+        curPageNo = newPageNo;
+        status = curPage->insertRecord(rec, rid);
+        if (status != OK){return status;}
+
+        /*
         // modify header page contents
         headerPage->lastPage = newPageNo;
         headerPage->pageCnt++;
@@ -690,7 +715,7 @@ const Status InsertFileScan::insertRecord(const Record & rec, RID& outRid)
             headerPage->recCnt++;
             hdrDirtyFlag = true;
             curDirtyFlag = true;
-        }
+        }*/
     }
     return status;
 }
