@@ -3,7 +3,9 @@
  * Scott Huddleston - 908 229 1163 - schuddleston@wisc.edu
  * Manoj Arulmurugan - 908 754 9409 - arulmurugan@wisc.edu
  * 
- * *** TO DO ***
+ * Sets up and provides operateions for heap files, which
+ * contain a linked list of pages, each containing records. 
+ * These records can be searched for, inserted, and removed.
  */
 
 #include "heapfile.h"
@@ -75,9 +77,10 @@ const Status destroyHeapFile(const string fileName)
 	return (db.destroyFile (fileName));
 }
 
-// constructor opens the underlying file
 /**
- * TO DO
+ * Constructor for the HeapFile, opens up underlying file.
+ * @param fileName the database file being accessed
+ * @param returnStatus the result of constructor operations 
  */
 HeapFile::HeapFile(const string & fileName, Status& returnStatus)
 {
@@ -89,7 +92,7 @@ HeapFile::HeapFile(const string & fileName, Status& returnStatus)
     // open the file and read in the header page and the first data page
     if ((status = db.openFile(fileName, filePtr)) == OK)
     {
-        int tempPageNo;
+        int tempPageNo; // used for page setup
 
         // Gets the page number of the header page of the file
         status = filePtr->getFirstPage(tempPageNo);
@@ -203,6 +206,7 @@ const Status HeapFile::getRecord(const RID & rid, Record & rec)
             status = bufMgr->readPage(filePtr, rid.pageNo, curPage);
             if (status != OK){return status;}
 
+            // Bookkeeping
             curPageNo = rid.pageNo;
             curRec = rid;
             curDirtyFlag = false;
@@ -305,7 +309,11 @@ const Status HeapFileScan::resetScan()
     return OK;
 }
 
-
+/**
+ * Returns the next record satisfying a scan predicate.
+ * @param outRid the next record
+ * @return Status OK if no errors occurred, otherwise the first error that occurred
+ */
 const Status HeapFileScan::scanNext(RID& outRid)
 {
     Status 	status = OK;
@@ -491,7 +499,12 @@ InsertFileScan::~InsertFileScan()
     }
 }
 
-// Insert a record into the file
+/**
+ * Inserts the record described by rec into the file.
+ * @param rec the record being inserted
+ * @param outRid the RID of the inserted record 
+ * @return Status OK if no errors occurred, otherwise the first error encountered
+ */
 const Status InsertFileScan::insertRecord(const Record & rec, RID& outRid)
 {
     Page*    newPage;
