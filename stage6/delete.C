@@ -17,10 +17,21 @@ const Status QU_Delete(const string & relation,
 		       const char *attrValue)
 {
 // part 6
-return OK;
 
+	Status status = OK;
+	HeapFileScan scanner(relation, status);
+	if(status != OK) return status;
 
+	status = scanner.startScan(0, attrName.length(), type, attrValue, op);
+	if(status != OK) return status;
 
+	RID rid;
+	while(scanner.scanNext(rid) == OK) {
+		status = scanner.deleteRecord();
+		if(status != OK) return status;
+	}
+
+	return OK;
 }
 
 
