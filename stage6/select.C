@@ -1,6 +1,6 @@
 #include "catalog.h"
 #include "query.h"
-
+#include <memory>
 
 // forward declaration
 const Status ScanSelect(const string & result, 
