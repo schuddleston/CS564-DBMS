@@ -72,7 +72,7 @@ for (int i = 0; i < attrCnt; i++) {
 				// If attribute type is a string
 				case STRING:
 					memcpy(recData + attrSchema[i].attrOffset, 
-							(void *)&sVal, attrSchema[i].attrLen);
+							(void *)sVal, attrSchema[i].attrLen);
 					break;
 				// If none of the above attribute types
 				default:
