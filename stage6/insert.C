@@ -90,12 +90,6 @@ record.length = width;
 // Inserts full record into relation
 status = iFile->insertRecord(record, rid);
 
-// Frees memory no longer in use
-delete [] recData;
-delete iFile;
-free(attrSchema);
-free(sVal);
-
 return status; // OK if insertion successful
 }
 
