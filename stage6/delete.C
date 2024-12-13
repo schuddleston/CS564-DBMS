@@ -1,14 +1,6 @@
 #include "catalog.h"
 #include "query.h"
 
-
-/*
- * Deletes records from a specified relation.
- *
- * Returns:
- * 	OK on success
- * 	an error code otherwise
- */
 /**
  * Deletes records from a specified relation based on a predicate.
  * 
