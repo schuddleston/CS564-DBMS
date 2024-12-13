@@ -13,7 +13,7 @@ const Status QU_Insert(const string & relation,
 	const int attrCnt, 
 	const attrInfo attrList[])
 {
-// Borrows code from joinHTC.C and load.C
+cout << "Doing QU_Insert " << endl;
 
 Status status; // Status to be returned
 AttrDesc* attrSchema; // Attributes of relation
