@@ -9,7 +9,16 @@
  * 	OK on success
  * 	an error code otherwise
  */
-
+/**
+ * Deletes records from a specified relation based on a predicate.
+ * 
+ * @param relation Table to delete record from
+ * @param attrName Attribute name in predicate
+ * @param op Operator in predicate
+ * @param type Type of attribute in predicate
+ * @param attrValue Actual value in predicate
+ * @return Status OK if no errors occurred, otherwise the first error that occurred
+ */
 const Status QU_Delete(const string & relation, 
 		       const string & attrName,
 		       const Operator op,

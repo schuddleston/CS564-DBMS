@@ -1,14 +1,14 @@
 #include "catalog.h"
 #include "query.h"
 
-/*
+/**
  * Inserts a record into the specified relation.
- *
- * Returns:
- * 	OK on success
- * 	an error code otherwise
+ * 
+ * @param relation Table to store tuple/record in
+ * @param attrCnt Number of attributes
+ * @param attrList Given attributes to insert
+ * @return Status OK if no errors occurred, otherwise the first error that occurred
  */
-
 const Status QU_Insert(const string & relation, 
 	const int attrCnt, 
 	const attrInfo attrList[])

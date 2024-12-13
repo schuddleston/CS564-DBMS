@@ -10,6 +10,17 @@ const Status ScanSelect(const string &result,
                         const char *filter,
                         const int reclen);
 
+/**
+ * Scans for records matching the defined parameters.
+ * 
+ * @param result Table to store output in
+ * @param projCnt Number of projections (attributes)
+ * @param projNames Attributes of table
+ * @param attr Selection condition
+ * @param op Operator (>, >=, =, <=, <) for selection
+ * @param attrValue Filter for selection
+ * @return Status OK if no errors occurred, otherwise the first error that occurred
+ */
 const Status QU_Select(const string &result,
                        const int projCnt,
                        const attrInfo projNames[],
@@ -58,6 +69,19 @@ const Status QU_Select(const string &result,
 	return OK;
 }
 
+/**
+ * Working method for scanning records matching the defined filter,
+ * storing the results in a new table.
+ * 
+ * @param result Table to store output in
+ * @param projCnt Number of projections (attributes)
+ * @param projNames Attributes of table
+ * @param attrDesc Attriibute for selection
+ * @param op Operator (>, >=, =, <=, <) for selection
+ * @param filter Filter for selection
+ * @param reclen Length (width) of tuples/records 
+ * @return Status OK if no errors occurred, otherwise the first error that occurred
+ */
 const Status ScanSelect(const string & result,
         const int projCnt,
         const AttrDesc projNames[],
