@@ -67,7 +67,7 @@ for (int i = 0; i < attrCnt; i++) {
 				case FLOAT:
 					tempFloat = atof(tempVal); // converts value to float
 					memcpy(recData + attrSchema[i].attrOffset, 
-							(void *)&tempVal, attrSchema[i].attrLen);
+							(void *)&tempFloat, attrSchema[i].attrLen);
 					break;
 				// If attribute type is a string
 				case STRING:
