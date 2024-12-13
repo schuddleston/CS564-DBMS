@@ -1,0 +1,8 @@
+Krishna Ramesh - kramesh5@wisc.edu
+Manoj Arulmurugan - arulmurugan@wisc.edu
+Scott Huddleston - schuddleston@wisc.edu
+
+Scott worked on the QU_Insert() method.
+Manoj worked on the QU_Delete() method.
+Krishna worked on the QU_Select() method.
+All three of us worked together to debug and finish ScanSelect.
