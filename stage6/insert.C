@@ -39,9 +39,9 @@ if (status != OK) {return status;}
 char *recData; // Holds values in tuple to be added
 if (!(recData = new char[width])) {return INSUFMEM;}
 
-int iVal; // Used for integer attributes
-float fVal; // Used for float attributes
-char *sVal; // Holds value of any attribute
+int tempInt; // Used for integer attributes
+float tempFloat; // Used for float attributes
+char *tempVal; // Holds value of any attribute
 
 // Iterates through relation attributes
 for (int i = 0; i < attrCnt; i++) {
@@ -54,25 +54,25 @@ for (int i = 0; i < attrCnt; i++) {
 		if (strcmp(attrSchema[i].attrName, attrList[j].attrName) == 0) {
 
 			// Gets value of this attribute
-			sVal = (char *)attrList[j].attrValue;
+			tempVal = (char *)attrList[j].attrValue;
 
 			switch (attrList[j].attrType) {
 				// If attribute type is integer
 				case INTEGER:	
-					iVal = atoi(sVal); // converts value to integer
+					tempInt = atoi(tempVal); // converts value to integer
 					memcpy(recData + attrSchema[i].attrOffset, 
-							(void *)&iVal, attrSchema[i].attrLen);
+							(void *)&tempInt, attrSchema[i].attrLen);
 					break;
 				// If attribute type is a float
 				case FLOAT:
-					fVal = atof(sVal); // converts value to float
+					tempFloat = atof(tempVal); // converts value to float
 					memcpy(recData + attrSchema[i].attrOffset, 
-							(void *)&fVal, attrSchema[i].attrLen);
+							(void *)&tempVal, attrSchema[i].attrLen);
 					break;
 				// If attribute type is a string
 				case STRING:
 					memcpy(recData + attrSchema[i].attrOffset, 
-							(void *)sVal, attrSchema[i].attrLen);
+							(void *)tempVal, attrSchema[i].attrLen);
 					break;
 				// If none of the above attribute types
 				default:
