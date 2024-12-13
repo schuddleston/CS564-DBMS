@@ -11,19 +11,47 @@
  */
 
 const Status QU_Delete(const string & relation, 
-		       const string & attrName, 
+		       const string & attrName,
 		       const Operator op,
-		       const Datatype type, 
+		       const Datatype type,
 		       const char *attrValue)
 {
 // part 6
+	cout << "Doing QU_Delete " << endl;
 
+	AttrDesc attrSchema; // Attributes of relation
 	Status status = OK;
 	HeapFileScan scanner(relation, status);
 	if(status != OK) return status; // error from creating scanner object instance
 
+	int offset, length;	
+
+	// check if we need to remove all entries in relation
+	if(attrName.length() == 0) {
+		offset = 0;
+		length = 0;
+	}
+	else {
+		status = attrCat->getInfo(relation, attrName, attrSchema);
+		if(status != OK) return status; // error from getInfo()
+
+		offset = attrSchema.attrOffset;
+		length = attrSchema.attrLen;
+	}
+
+	int new_int;
+	float new_float;
+	if(type == INTEGER) { // type is int
+		new_int = atoi(attrValue);
+		attrValue = (const char *)&new_int;
+	}
+	else if(type == FLOAT) { // type is float
+		new_float = atof(attrValue);
+		attrValue = (const char *)&new_float;
+	}
+
 	// start scanning for appropriate entires in the table that match parameters
-	status = scanner.startScan(0, attrName.length(), type, attrValue, op);
+	status = scanner.startScan(offset, length, type, attrValue, op);
 	if(status != OK) return status; // error from calling startScan()
 
 	RID rid;
